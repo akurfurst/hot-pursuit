@@ -138,7 +138,7 @@ public:
     }
 
     // Create the sprite. This will be moved to a constructor
-    bn::sprite_ptr sprite = bn::sprite_items::dot.create_sprite();
+    bn::sprite_ptr sprite;
     bn::fixed speed;       // The speed of the player
     bn::size size;         // The width and height of the sprite
     bn::rect bounding_box; // The rectangle around the sprite for checking collision
