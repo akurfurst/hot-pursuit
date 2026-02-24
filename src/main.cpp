@@ -150,8 +150,8 @@ public:
 //Enemy class
 class Enemy{
     public:
-        Enemy(int start_x, int start_y, bn::size size) : sprite(bn::sprite_items::villain.create_sprite(start_x, start_y)),
-                                                         size(size),
+        Enemy(int start_x, int start_y, bn::size e_size) : sprite(bn::sprite_items::villain.create_sprite(start_x, start_y)),
+                                                         size(e_size),
                                                          bounding_box(create_bounding_box(sprite, size))
         {}
         void update(){
