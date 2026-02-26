@@ -7,6 +7,7 @@
 #include <bn_sprite_ptr.h>
 #include <bn_sprite_text_generator.h>
 #include <bn_math.h>
+#include <bn_random.h>
 
 #include "common_fixed_8x16_font.h"
 #include "bn_sprite_items_dot.h"
@@ -181,6 +182,7 @@ public:
 int main()
 {
     bn::core::init();
+    bn::random rand;
 
     // Create a new score display
     ScoreDisplay scoreDisplay = ScoreDisplay();
@@ -198,9 +200,10 @@ int main()
         // Reset the current score and player position if the player collides with enemy
         if (enemy.bounding_box.intersects(player.bounding_box))
         {
+
             scoreDisplay.resetScore();
-            player.sprite.set_x(0);
-            player.sprite.set_y(0);
+            player.sprite.set_x(rand.get_int(MIN_X, MAX_X));
+            player.sprite.set_y(rand.get_int(MIN_Y, MAX_Y));
         }
 
         // Update the scores and disaply them
