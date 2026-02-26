@@ -6,6 +6,7 @@
 #include <bn_string.h>
 #include <bn_sprite_ptr.h>
 #include <bn_sprite_text_generator.h>
+#include <bn_math.h>
 
 #include "common_fixed_8x16_font.h"
 #include "bn_sprite_items_dot.h"
@@ -147,21 +148,34 @@ public:
     bn::rect bounding_box; // The rectangle around the sprite for checking collision
 };
 
-//Enemy class
-class Enemy{
-    public:
-        Enemy(int start_x, int start_y, bn::size e_size) : sprite(bn::sprite_items::villain.create_sprite(start_x, start_y)),
-                                                         size(e_size),
-                                                         bounding_box(create_bounding_box(sprite, size))
-        {}
-        void update(){
+// Enemy class
+class Enemy
+{
 
+public:
+    Enemy(int start_x, int start_y, bn::fixed e_speed, bn::size e_size) : sprite(bn::sprite_items::villain.create_sprite(start_x, start_y)),
+                                                                          speed(e_speed),
+                                                                          size(e_size),
+                                                                          bounding_box(create_bounding_box(sprite, size))
+    {
+    }
+    void update(Player player)
+    {
+        // Calculate length (magnitude)
+        bn::fixed distX = player.sprite.x() - sprite.x();
+        bn::fixed distY = player.sprite.y() - sprite.y();
+        bn::fixed move = bn::sqrt((distX * distX) + (distY * distY));
+        if (move != 0)
+        {
+            sprite.set_position((sprite.x() + ((distX / move)) * speed), (sprite.y() + ((distY / move)) * speed));
         }
+        bounding_box = create_bounding_box(sprite, size);
+    }
 
-        bn::sprite_ptr sprite;
-        bn::fixed speed; 
-        bn::size size;   
-        bn::rect bounding_box;
+    bn::sprite_ptr sprite;
+    bn::fixed speed;
+    bn::size size;
+    bn::rect bounding_box;
 };
 
 int main()
@@ -174,20 +188,19 @@ int main()
     // Create a player and initialize it
     // TODO: we will move the initialization logic to a constructor.
     Player player = Player(44, 22, 1.5, PLAYER_SIZE);
-    Enemy enemy = Enemy(30, 52, ENEMY_SIZE);
+    Enemy enemy = Enemy(0, 0, 2, ENEMY_SIZE);
     // bn::sprite_ptr enemy_sprite = bn::sprite_items::villain.create_sprite(-30, 22);
     // bn::rect enemy_bounding_box = create_bounding_box(enemy_sprite, ENEMY_SIZE);
-
     while (true)
     {
         player.update();
-
+        enemy.update(player);
         // Reset the current score and player position if the player collides with enemy
         if (enemy.bounding_box.intersects(player.bounding_box))
         {
             scoreDisplay.resetScore();
-            player.sprite.set_x(44);
-            player.sprite.set_y(22);
+            player.sprite.set_x(0);
+            player.sprite.set_y(0);
         }
 
         // Update the scores and disaply them
