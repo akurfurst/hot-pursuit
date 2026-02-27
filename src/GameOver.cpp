@@ -6,7 +6,6 @@
 
 bn::sprite_text_generator text_generator(common::fixed_8x16_sprite_font);
 bn::vector<bn::sprite_ptr, 16> game_over_sprites;
-bool isShow = false;
 
 void GameOver()
 {
