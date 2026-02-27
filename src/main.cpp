@@ -36,6 +36,10 @@ static constexpr int SCORE_Y = -70;
 static constexpr int HIGH_SCORE_X = -70;
 static constexpr int HIGH_SCORE_Y = -70;
 
+// HP LOCATIONS - will follow highscore location
+static constexpr int HP_X = HIGH_SCORE_X;
+static constexpr int HP_Y = HIGH_SCORE_Y + 10;
+
 // MaxPlayer HP
 static constexpr int MAX_PLAYER_HP = 50;
 
@@ -150,7 +154,7 @@ public:
         bounding_box = create_bounding_box(sprite, size);
 
         hp_sprites.clear();
-        show_Player_Hp(SCORE_X / 2, SCORE_Y / 2);
+        show_Player_Hp(HP_X, HP_Y);
     }
 
     /**
@@ -158,9 +162,9 @@ public:
      */
     void show_Player_Hp(int x, int y)
     {
-        // Convert number to a string and then display it
-        bn::string<MAX_SCORE_CHARS> number_string = bn::to_string<MAX_SCORE_CHARS>(playerHP);
-        text_generator.generate(x, y, number_string, hp_sprites);
+        bn::string<MAX_HP_CHARS> text = "HP: ";
+        bn::string<MAX_HP_CHARS> number_string = bn::to_string<MAX_HP_CHARS>(playerHP);
+        text_generator.generate(x, y, text + number_string, hp_sprites);
     }
 
     bn::vector<bn::sprite_ptr, MAX_HP_CHARS> hp_sprites; // Sprites to display scores
