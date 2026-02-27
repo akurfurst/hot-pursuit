@@ -9,6 +9,7 @@
 #include <bn_math.h>
 #include <bn_random.h>
 
+#include "game_over.h"
 #include "common_fixed_8x16_font.h"
 #include "bn_sprite_items_dot.h"
 #include "bn_sprite_items_villain.h"
@@ -25,8 +26,7 @@ static constexpr int MIN_X = -bn::display::width() / 2;
 static constexpr int MAX_X = bn::display::width() / 2;
 
 // Number of characters required to show two of the longest numer possible in an int (-2147483647)
-static constexpr int MAX_SCORE_CHARS = 22;
-static constexpr int MAX_HP_CHARS = 22;
+static constexpr int MAX_CHARS = 22;
 
 // Score location
 static constexpr int SCORE_X = -70;
@@ -41,7 +41,7 @@ static constexpr int HP_X = HIGH_SCORE_X;
 static constexpr int HP_Y = HIGH_SCORE_Y + 10;
 
 // MaxPlayer HP
-static constexpr int MAX_PLAYER_HP = 50;
+static constexpr int MAX_PLAYER_HP = 3;
 
 /**
  * Creates a rectangle centered at a sprite's location with a given size.
@@ -67,7 +67,7 @@ class ScoreDisplay
 public:
     ScoreDisplay() : score(0),                                                                 // Start score at 0
                      high_score(0),                                                            // Start high score at 0
-                     score_sprites(bn::vector<bn::sprite_ptr, MAX_SCORE_CHARS>()),             // Start with empty vector for score sprites
+                     score_sprites(bn::vector<bn::sprite_ptr, MAX_CHARS>()),                   // Start with empty vector for score sprites
                      text_generator(bn::sprite_text_generator(common::fixed_8x16_sprite_font)) // Use a new text generator
     {
     }
@@ -95,10 +95,10 @@ public:
     /**
      * Displays a number at the given position
      */
-    void show_number(int x, int y, int number, bn::string<MAX_SCORE_CHARS> text)
+    void show_number(int x, int y, int number, bn::string<MAX_CHARS> text)
     {
         // Convert number to a string and then display it
-        bn::string<MAX_SCORE_CHARS> number_string = bn::to_string<MAX_SCORE_CHARS>(number);
+        bn::string<MAX_CHARS> number_string = bn::to_string<MAX_CHARS>(number);
         text_generator.generate(x, y, text + number_string, score_sprites);
     }
 
@@ -110,10 +110,10 @@ public:
         score = 0;
     }
 
-    int score;                                                 // current score
-    int high_score;                                            // best core
-    bn::vector<bn::sprite_ptr, MAX_SCORE_CHARS> score_sprites; // Sprites to display scores
-    bn::sprite_text_generator text_generator;                  // Text generator for scores
+    int score;                                           // current score
+    int high_score;                                      // best core
+    bn::vector<bn::sprite_ptr, MAX_CHARS> score_sprites; // Sprites to display scores
+    bn::sprite_text_generator text_generator;            // Text generator for scores
 };
 
 class Player
@@ -123,7 +123,7 @@ public:
                                                                                                    speed(player_speed),
                                                                                                    size(player_size),
                                                                                                    bounding_box(create_bounding_box(sprite, size)),
-                                                                                                   hp_sprites(bn::vector<bn::sprite_ptr, MAX_HP_CHARS>()), // Start with empty vector for score sprites
+                                                                                                   hp_sprites(bn::vector<bn::sprite_ptr, MAX_CHARS>()), // Start with empty vector for score sprites
                                                                                                    text_generator(bn::sprite_text_generator(common::fixed_8x16_sprite_font)),
                                                                                                    playerHP(hp)
     {
@@ -162,20 +162,20 @@ public:
      */
     void show_Player_Hp(int x, int y)
     {
-        bn::string<MAX_HP_CHARS> text = "HP: ";
-        bn::string<MAX_HP_CHARS> number_string = bn::to_string<MAX_HP_CHARS>(playerHP);
+        bn::string<MAX_CHARS> text = "HP: ";
+        bn::string<MAX_CHARS> number_string = bn::to_string<MAX_CHARS>(playerHP);
         text_generator.generate(x, y, text + number_string, hp_sprites);
     }
 
-    bn::vector<bn::sprite_ptr, MAX_HP_CHARS> hp_sprites; // Sprites to display scores
-    bn::sprite_text_generator text_generator;            // Text generator for scores
+    bn::vector<bn::sprite_ptr, MAX_CHARS> hp_sprites; // Sprites to display player hp
+    bn::sprite_text_generator text_generator;         // Text generator for hp
 
     // Create the sprite. This will be moved to a constructor
     bn::sprite_ptr sprite;
-    bn::fixed speed;       // The speed of the player
-    bn::size size;         // The width and height of the sprite
-    bn::rect bounding_box; // The rectangle around the sprite for checking collision
+    bn::fixed speed; // The speed of the player
+    bn::size size;   // The width and height of the sprite
     bn::fixed playerHP;
+    bn::rect bounding_box; // The rectangle around the sprite for checking collision
 };
 
 // Enemy class
@@ -231,12 +231,20 @@ int main()
         // Reset the current score and player position if the player collides with enemy
         if (enemy.bounding_box.intersects(player.bounding_box))
         {
-            scoreDisplay.resetScore();
             player.playerHP -= 1;
             player.sprite.set_x(rand.get_int(MIN_X, MAX_X));
             player.sprite.set_y(rand.get_int(MIN_Y, MAX_Y));
-        }
 
+            if (player.playerHP <= 0)
+            {
+                player.playerHP = 0; // normalizes player hp
+            }
+        }
+        if (player.playerHP <= 0)
+        {
+            scoreDisplay.resetScore();
+            GameOver();
+        }
         // Update the scores and disaply them
         scoreDisplay.update();
 
