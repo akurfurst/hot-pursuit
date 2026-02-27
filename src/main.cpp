@@ -12,6 +12,7 @@
 #include "common_fixed_8x16_font.h"
 #include "bn_sprite_items_dot.h"
 #include "bn_sprite_items_villain.h"
+#include "bn_sprite_items_character.h"
 #include "bn_sprite_items_square.h"
 
 // Width and height of the the player bounding box
@@ -25,6 +26,7 @@ static constexpr int MAX_X = bn::display::width() / 2;
 
 // Number of characters required to show two of the longest numer possible in an int (-2147483647)
 static constexpr int MAX_SCORE_CHARS = 22;
+static constexpr int MAX_HP_CHARS = 22;
 
 // Score location
 static constexpr int SCORE_X = 70;
@@ -33,6 +35,9 @@ static constexpr int SCORE_Y = -70;
 // High score location
 static constexpr int HIGH_SCORE_X = -70;
 static constexpr int HIGH_SCORE_Y = -70;
+
+// MaxPlayer HP
+static constexpr int MAX_PLAYER_HP = 50;
 
 /**
  * Creates a rectangle centered at a sprite's location with a given size.
@@ -110,10 +115,13 @@ public:
 class Player
 {
 public:
-    Player(int start_x, int start_y, bn::fixed player_speed, bn::size player_size) : sprite(bn::sprite_items::dot.create_sprite(start_x, start_y)),
-                                                                                     speed(player_speed),
-                                                                                     size(player_size),
-                                                                                     bounding_box(create_bounding_box(sprite, size))
+    Player(int start_x, int start_y, bn::fixed player_speed, bn::size player_size, bn::fixed hp) : sprite(bn::sprite_items::character.create_sprite(start_x, start_y)),
+                                                                                                   speed(player_speed),
+                                                                                                   size(player_size),
+                                                                                                   bounding_box(create_bounding_box(sprite, size)),
+                                                                                                   hp_sprites(bn::vector<bn::sprite_ptr, MAX_HP_CHARS>()), // Start with empty vector for score sprites
+                                                                                                   text_generator(bn::sprite_text_generator(common::fixed_8x16_sprite_font)),
+                                                                                                   playerHP(hp)
     {
     }
     /**
@@ -140,13 +148,30 @@ public:
         }
 
         bounding_box = create_bounding_box(sprite, size);
+
+        hp_sprites.clear();
+        show_Player_Hp(SCORE_X / 2, SCORE_Y / 2);
     }
+
+    /**
+     * Displays a number at the given position
+     */
+    void show_Player_Hp(int x, int y)
+    {
+        // Convert number to a string and then display it
+        bn::string<MAX_SCORE_CHARS> number_string = bn::to_string<MAX_SCORE_CHARS>(playerHP);
+        text_generator.generate(x, y, number_string, hp_sprites);
+    }
+
+    bn::vector<bn::sprite_ptr, MAX_HP_CHARS> hp_sprites; // Sprites to display scores
+    bn::sprite_text_generator text_generator;            // Text generator for scores
 
     // Create the sprite. This will be moved to a constructor
     bn::sprite_ptr sprite;
     bn::fixed speed;       // The speed of the player
     bn::size size;         // The width and height of the sprite
     bn::rect bounding_box; // The rectangle around the sprite for checking collision
+    bn::fixed playerHP;
 };
 
 // Enemy class
@@ -162,7 +187,7 @@ public:
     }
     void update(Player player)
     {
-        // Calculate length (magnitude)
+
         bn::fixed distX = player.sprite.x() - sprite.x();
         bn::fixed distY = player.sprite.y() - sprite.y();
         bn::fixed move = bn::sqrt((distX * distX) + (distY * distY));
@@ -189,19 +214,21 @@ int main()
 
     // Create a player and initialize it
     // TODO: we will move the initialization logic to a constructor.
-    Player player = Player(44, 22, 1.5, PLAYER_SIZE);
+    Player player = Player(44, 22, 3, PLAYER_SIZE, MAX_PLAYER_HP);
     Enemy enemy = Enemy(0, 0, 2, ENEMY_SIZE);
+
     // bn::sprite_ptr enemy_sprite = bn::sprite_items::villain.create_sprite(-30, 22);
     // bn::rect enemy_bounding_box = create_bounding_box(enemy_sprite, ENEMY_SIZE);
     while (true)
     {
         player.update();
         enemy.update(player);
+
         // Reset the current score and player position if the player collides with enemy
         if (enemy.bounding_box.intersects(player.bounding_box))
         {
-
             scoreDisplay.resetScore();
+            player.playerHP -= 1;
             player.sprite.set_x(rand.get_int(MIN_X, MAX_X));
             player.sprite.set_y(rand.get_int(MIN_Y, MAX_Y));
         }
