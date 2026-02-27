@@ -29,12 +29,12 @@ static constexpr int MAX_SCORE_CHARS = 22;
 static constexpr int MAX_HP_CHARS = 22;
 
 // Score location
-static constexpr int SCORE_X = 70;
+static constexpr int SCORE_X = -70;
 static constexpr int SCORE_Y = -70;
 
-// High score location
-static constexpr int HIGH_SCORE_X = -70;
-static constexpr int HIGH_SCORE_Y = -70;
+// High score location - will follow basic score
+static constexpr int HIGH_SCORE_X = SCORE_X;
+static constexpr int HIGH_SCORE_Y = SCORE_Y + 10;
 
 // HP LOCATIONS - will follow highscore location
 static constexpr int HP_X = HIGH_SCORE_X;
@@ -88,18 +88,18 @@ public:
         score_sprites.clear();
 
         // Display new scores
-        show_number(SCORE_X, SCORE_Y, score);
-        show_number(HIGH_SCORE_X, HIGH_SCORE_Y, high_score);
+        show_number(SCORE_X, SCORE_Y, score, "Score: ");
+        show_number(HIGH_SCORE_X, HIGH_SCORE_Y, high_score, "High Score: ");
     }
 
     /**
      * Displays a number at the given position
      */
-    void show_number(int x, int y, int number)
+    void show_number(int x, int y, int number, bn::string<MAX_SCORE_CHARS> text)
     {
         // Convert number to a string and then display it
         bn::string<MAX_SCORE_CHARS> number_string = bn::to_string<MAX_SCORE_CHARS>(number);
-        text_generator.generate(x, y, number_string, score_sprites);
+        text_generator.generate(x, y, text + number_string, score_sprites);
     }
 
     /**
