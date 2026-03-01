@@ -46,11 +46,11 @@ static constexpr int MAX_PLAYER_HP = 3;
 // max enemys
 static constexpr int MAX_ENEMY = 5;
 
-//Enemy spawns
+// Enemy spawns
 int NEXT_ENEMY_SCORE = 500;
 
-    // random number generator
-    bn::random rng;
+// random number generator
+bn::random rng;
 
 /**
  * Creates a rectangle centered at a sprite's location with a given size.
@@ -176,15 +176,14 @@ public:
         text_generator.generate(x, y, text + number_string, hp_sprites);
     }
 
-    bn::vector<bn::sprite_ptr, MAX_CHARS> hp_sprites; // Sprites to display player hp
-    bn::sprite_text_generator text_generator;         // Text generator for hp
-
     // Create the sprite. This will be moved to a constructor
     bn::sprite_ptr sprite;
-    bn::fixed speed; // The speed of the player
-    bn::size size;   // The width and height of the sprite
+    bn::fixed speed;                                  // The speed of the player
+    bn::size size;                                    // The width and height of the sprite
+    bn::rect bounding_box;                            // The rectangle around the sprite for checking collision
+    bn::vector<bn::sprite_ptr, MAX_CHARS> hp_sprites; // Sprites to display player hp
+    bn::sprite_text_generator text_generator;         // Text generator for hp
     bn::fixed playerHP;
-    bn::rect bounding_box; // The rectangle around the sprite for checking collision
 };
 
 // Enemy class
@@ -268,10 +267,11 @@ int main()
             enemys.push_back(Enemy(0, 0, 2, ENEMY_SIZE));
         }
 
-        //spawn new enemy if score has increased by 1000
-        if(scoreDisplay.score >= NEXT_ENEMY_SCORE && enemys.size() < MAX_ENEMY){
+        // spawn new enemy if score has increased by 1000
+        if (scoreDisplay.score >= NEXT_ENEMY_SCORE && enemys.size() < MAX_ENEMY)
+        {
             enemys.push_back(Enemy(0, 0, 2, ENEMY_SIZE));
-            NEXT_ENEMY_SCORE+= 500;
+            NEXT_ENEMY_SCORE += 500;
         }
 
         // Update the scores and disaply them
