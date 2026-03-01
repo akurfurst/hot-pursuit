@@ -46,8 +46,11 @@ static constexpr int MAX_PLAYER_HP = 3;
 // max enemys
 static constexpr int MAX_ENEMY = 5;
 
-// random number generator
-bn::random rng;
+//Enemy spawns
+int NEXT_ENEMY_SCORE = 500;
+
+    // random number generator
+    bn::random rng;
 
 /**
  * Creates a rectangle centered at a sprite's location with a given size.
@@ -261,7 +264,16 @@ int main()
         {
             scoreDisplay.resetScore();
             GameOver();
+            enemys.clear();
+            enemys.push_back(Enemy(0, 0, 2, ENEMY_SIZE));
         }
+
+        //spawn new enemy if score has increased by 1000
+        if(scoreDisplay.score >= NEXT_ENEMY_SCORE && enemys.size() < MAX_ENEMY){
+            enemys.push_back(Enemy(0, 0, 2, ENEMY_SIZE));
+            NEXT_ENEMY_SCORE+= 500;
+        }
+
         // Update the scores and disaply them
         scoreDisplay.update();
 
