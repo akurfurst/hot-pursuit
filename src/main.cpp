@@ -43,6 +43,12 @@ static constexpr int HP_Y = HIGH_SCORE_Y + 10;
 // MaxPlayer HP
 static constexpr int MAX_PLAYER_HP = 3;
 
+// max enemys
+static constexpr int MAX_ENEMY = 5;
+
+// random number generator
+bn::random rng;
+
 /**
  * Creates a rectangle centered at a sprite's location with a given size.
  * sprite the sprite to center the box around
@@ -189,7 +195,7 @@ public:
                                                                           bounding_box(create_bounding_box(sprite, size))
     {
     }
-    void update(Player player)
+    void update(Player &player)
     {
 
         bn::fixed distX = player.sprite.x() - sprite.x();
@@ -199,6 +205,19 @@ public:
         {
             sprite.set_position((sprite.x() + ((distX / move)) * speed), (sprite.y() + ((distY / move)) * speed));
         }
+
+        if (bounding_box.intersects(player.bounding_box))
+        {
+            player.playerHP -= 1;
+            player.sprite.set_x(rng.get_int(MIN_X, MAX_X));
+            player.sprite.set_y(rng.get_int(MIN_Y, MAX_Y));
+
+            if (player.playerHP <= 0)
+            {
+                player.playerHP = 0; // normalizes player hp
+            }
+        }
+
         bounding_box = create_bounding_box(sprite, size);
     }
 
@@ -211,7 +230,6 @@ public:
 int main()
 {
     bn::core::init();
-    bn::random rand;
 
     // Create a new score display
     ScoreDisplay scoreDisplay = ScoreDisplay();
@@ -219,27 +237,26 @@ int main()
     // Create a player and initialize it
     // TODO: we will move the initialization logic to a constructor.
     Player player = Player(44, 22, 3, PLAYER_SIZE, MAX_PLAYER_HP);
-    Enemy enemy = Enemy(0, 0, 2, ENEMY_SIZE);
+    // Enemy enemy = Enemy(0, 0, 2, ENEMY_SIZE);
+
+    // enemy vector
+    bn::vector<Enemy, MAX_ENEMY> enemys = {};
+    enemys.push_back(Enemy(0, 0, 2, ENEMY_SIZE));
 
     // bn::sprite_ptr enemy_sprite = bn::sprite_items::villain.create_sprite(-30, 22);
     // bn::rect enemy_bounding_box = create_bounding_box(enemy_sprite, ENEMY_SIZE);
     while (true)
     {
         player.update();
-        enemy.update(player);
+        // enemy.update(player);
+
+        for (Enemy &enemy : enemys)
+        {
+            enemy.update(player);
+        }
 
         // Reset the current score and player position if the player collides with enemy
-        if (enemy.bounding_box.intersects(player.bounding_box))
-        {
-            player.playerHP -= 1;
-            player.sprite.set_x(rand.get_int(MIN_X, MAX_X));
-            player.sprite.set_y(rand.get_int(MIN_Y, MAX_Y));
 
-            if (player.playerHP <= 0)
-            {
-                player.playerHP = 0; // normalizes player hp
-            }
-        }
         if (player.playerHP <= 0)
         {
             scoreDisplay.resetScore();
