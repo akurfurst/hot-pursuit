@@ -38,7 +38,7 @@ void Player::update()
     bounding_box = create_bounding_box(sprite, size);
 
     hp_sprites.clear();
-    show_Player_Hp(-70, -60);
+    show_Player_Hp(-70, -50);
 }
 
 void Player::show_Player_Hp(int x, int y)

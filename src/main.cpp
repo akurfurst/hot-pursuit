@@ -17,6 +17,7 @@
 #include "bn_sprite_items_square.h"
 #include "Player.h"
 #include "create_bounding_box.h"
+#include "Enemy.h"
 
 // Width and height of the the player bounding box
 static constexpr bn::size PLAYER_SIZE = {8, 8};
@@ -52,7 +53,7 @@ static constexpr int MAX_ENEMY = 5;
 int NEXT_ENEMY_SCORE = 500;
 
 // random number generator
-bn::random rng;
+bn::random RNG;
 
 
 
@@ -118,48 +119,7 @@ public:
 
 
 
-// Enemy class
-class Enemy
-{
 
-public:
-    Enemy(int start_x, int start_y, bn::fixed e_speed, bn::size e_size) : sprite(bn::sprite_items::villain.create_sprite(start_x, start_y)),
-                                                                          speed(e_speed),
-                                                                          size(e_size),
-                                                                          bounding_box(create_bounding_box(sprite, size))
-    {
-    }
-    void update(Player &player)
-    {
-
-        bn::fixed distX = player.sprite.x() - sprite.x();
-        bn::fixed distY = player.sprite.y() - sprite.y();
-        bn::fixed move = bn::sqrt((distX * distX) + (distY * distY));
-        if (move != 0)
-        {
-            sprite.set_position((sprite.x() + ((distX / move)) * speed), (sprite.y() + ((distY / move)) * speed));
-        }
-
-        if (bounding_box.intersects(player.bounding_box))
-        {
-            player.playerHP -= 1;
-            player.sprite.set_x(rng.get_int(MIN_X, MAX_X));
-            player.sprite.set_y(rng.get_int(MIN_Y, MAX_Y));
-
-            if (player.playerHP <= 0)
-            {
-                player.playerHP = 0; // normalizes player hp
-            }
-        }
-
-        bounding_box = create_bounding_box(sprite, size);
-    }
-
-    bn::sprite_ptr sprite;
-    bn::fixed speed;
-    bn::size size;
-    bn::rect bounding_box;
-};
 
 int main()
 {
@@ -175,7 +135,7 @@ int main()
 
     // enemy vector
     bn::vector<Enemy, MAX_ENEMY> enemys = {};
-    enemys.push_back(Enemy(0, 0, 2, ENEMY_SIZE));
+    enemys.push_back(Enemy(0, 0, 2, ENEMY_SIZE, MIN_X, MIN_Y, MAX_X, MAX_Y, RNG));
 
     // bn::sprite_ptr enemy_sprite = bn::sprite_items::villain.create_sprite(-30, 22);
     // bn::rect enemy_bounding_box = create_bounding_box(enemy_sprite, ENEMY_SIZE);
@@ -196,13 +156,13 @@ int main()
             scoreDisplay.resetScore();
             GameOver();
             enemys.clear();
-            enemys.push_back(Enemy(0, 0, 2, ENEMY_SIZE));
+            enemys.push_back(Enemy(0, 0, 2, ENEMY_SIZE, MIN_X, MIN_Y, MAX_X, MAX_Y, RNG));
         }
 
         // spawn new enemy if score has increased by 1000
         if (scoreDisplay.score >= NEXT_ENEMY_SCORE && enemys.size() < MAX_ENEMY)
         {
-            enemys.push_back(Enemy(0, 0, 2, ENEMY_SIZE));
+            enemys.push_back(Enemy(0, 0, 2, ENEMY_SIZE, MIN_X, MIN_Y, MAX_X, MAX_Y, RNG));
             NEXT_ENEMY_SCORE += 500;
         }
 
