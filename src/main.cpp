@@ -15,6 +15,8 @@
 #include "bn_sprite_items_villain.h"
 #include "bn_sprite_items_character.h"
 #include "bn_sprite_items_square.h"
+#include "Player.h"
+#include "create_bounding_box.h"
 
 // Width and height of the the player bounding box
 static constexpr bn::size PLAYER_SIZE = {8, 8};
@@ -52,18 +54,7 @@ int NEXT_ENEMY_SCORE = 500;
 // random number generator
 bn::random rng;
 
-/**
- * Creates a rectangle centered at a sprite's location with a given size.
- * sprite the sprite to center the box around
- * box_size the dimensions of the bounding box
- */
-bn::rect create_bounding_box(bn::sprite_ptr sprite, bn::size box_size)
-{
-    return bn::rect(sprite.x().round_integer(),
-                    sprite.y().round_integer(),
-                    box_size.width(),
-                    box_size.height());
-}
+
 
 /**
  * Displays a score and high score.
@@ -125,66 +116,7 @@ public:
     bn::sprite_text_generator text_generator;            // Text generator for scores
 };
 
-class Player
-{
-public:
-    Player(int start_x, int start_y, bn::fixed player_speed, bn::size player_size, bn::fixed hp) : sprite(bn::sprite_items::character.create_sprite(start_x, start_y)),
-                                                                                                   speed(player_speed),
-                                                                                                   size(player_size),
-                                                                                                   bounding_box(create_bounding_box(sprite, size)),
-                                                                                                   hp_sprites(bn::vector<bn::sprite_ptr, MAX_CHARS>()), // Start with empty vector for score sprites
-                                                                                                   text_generator(bn::sprite_text_generator(common::fixed_8x16_sprite_font)),
-                                                                                                   playerHP(hp)
-    {
-    }
-    /**
-     * Update the position and bounding box of the player based on d-pad movement.
-     */
-    void update()
-    {
-        if (bn::keypad::right_held())
-        {
-            sprite.set_x(sprite.x() + speed);
-        }
-        if (bn::keypad::left_held())
-        {
-            sprite.set_x(sprite.x() - speed);
-        }
-        // TODO: Add logic for up and down
-        if (bn::keypad::up_held())
-        {
-            sprite.set_y(sprite.y() - speed);
-        }
-        if (bn::keypad::down_held())
-        {
-            sprite.set_y(sprite.y() + speed);
-        }
 
-        bounding_box = create_bounding_box(sprite, size);
-
-        hp_sprites.clear();
-        show_Player_Hp(HP_X, HP_Y);
-    }
-
-    /**
-     * Displays a number at the given position
-     */
-    void show_Player_Hp(int x, int y)
-    {
-        bn::string<MAX_CHARS> text = "HP: ";
-        bn::string<MAX_CHARS> number_string = bn::to_string<MAX_CHARS>(playerHP);
-        text_generator.generate(x, y, text + number_string, hp_sprites);
-    }
-
-    // Create the sprite. This will be moved to a constructor
-    bn::sprite_ptr sprite;
-    bn::fixed speed;                                  // The speed of the player
-    bn::size size;                                    // The width and height of the sprite
-    bn::rect bounding_box;                            // The rectangle around the sprite for checking collision
-    bn::vector<bn::sprite_ptr, MAX_CHARS> hp_sprites; // Sprites to display player hp
-    bn::sprite_text_generator text_generator;         // Text generator for hp
-    bn::fixed playerHP;
-};
 
 // Enemy class
 class Enemy
