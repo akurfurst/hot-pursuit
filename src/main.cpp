@@ -88,10 +88,10 @@ int main()
 
         if (player.playerHP <= 0)
         {
-            scoreDisplay.resetScore();
-            GameOver();
             enemys.clear();
             enemys.push_back(Enemy(0, 0, 2, ENEMY_SIZE, MIN_X, MIN_Y, MAX_X, MAX_Y, RNG));
+            scoreDisplay.resetScore();
+            GameOver(player.playerHP);
         }
 
         // spawn new enemy if score has increased by 1000

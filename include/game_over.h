@@ -2,6 +2,8 @@
 #ifndef GAME_OVER_H
 #define GAME_OVER_H
 
-void GameOver();
+#include "bn_fixed.h"
+
+void GameOver(bn::fixed &health);
 
 #endif
