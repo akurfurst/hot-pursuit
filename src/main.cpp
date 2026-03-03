@@ -101,6 +101,12 @@ int main()
             NEXT_ENEMY_SCORE += 500;
         }
 
+        //stop player from going off screen
+        if(player.sprite.x() >= MAX_X) player.sprite.set_x(MAX_X);
+        if(player.sprite.x() <= MIN_X) player.sprite.set_x(MIN_X);
+        if(player.sprite.y() >= MAX_Y) player.sprite.set_y(MAX_Y);
+        if(player.sprite.y() <= MIN_Y) player.sprite.set_y(MIN_Y);
+
         // Update the scores and disaply them
         scoreDisplay.update();
 
